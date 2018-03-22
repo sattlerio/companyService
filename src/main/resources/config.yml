@@ -1,0 +1,16 @@
+logging:
+  level: INFO
+  loggers:
+    com.sattlerio: DEBUG
+server:
+  type: simple
+  applicationContextPath: /
+  adminContextPath: /admin
+  connector:
+    type: http
+    port: 9000
+database:
+  driverClass: org.postgresql.Driver
+  user: ${COMPANY_SERVICE_POSTGRES_USER}
+  password: ${COMPANY_SERVICE_POSTGRES_PASSWORD}
+  url: jdbc:postgresql://${COMPANY_SERVICE_POSTGRES_HOST}:${COMPANY_SERVICE_POSTGRES_PORT}/${COMPANY_SERVICE_POSTGRES_DB}
