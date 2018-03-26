@@ -9,10 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.util.UUID;
 
-@Path("/company/{company_id}")
+@Path("/")
 @Produces(MediaType.APPLICATION_JSON)
 public class CompanyResource {
     private final static Logger log = LoggerFactory.getLogger(CompanyResource.class);
@@ -25,9 +27,17 @@ public class CompanyResource {
     @GET
     @Timed
     @ExceptionMetered
-    @Path("/details")
-    public Company fetchCompanyById(@PathParam("company_id")NonEmptyStringParam company_id) {
+    @Path("/details/{company_id}")
+    public Company fetchCompanyById(@Context HttpHeaders httpHeaders,
+                                    @PathParam("company_id")NonEmptyStringParam company_id) {
         String requestId = UUID.randomUUID().toString();
+
+        String userId = httpHeaders.getHeaderString("x-user-uuid");
+
+        if(userId == null) {
+            logInfoWithTransactionId("abort transaction because of missing X-USER header", requestId);
+            throw new WebApplicationException(400);
+        }
 
         if(!company_id.get().isPresent()) {
             logInfoWithTransactionId("abort transaction because of missing company id", requestId);
