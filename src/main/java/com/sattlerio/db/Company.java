@@ -13,11 +13,14 @@ public class Company {
     private String email_address;
     private String accounting_email;
     private String technical_email;
+    private String currency_id;
+    private String language_id;
 
     public Company(String company_uuid, String name, String country_id,
                    String address, String zip, String city, String vat,
                    String logo, String phone_number, String email_address,
-                   String accounting_email, String technical_email) {
+                   String accounting_email, String technical_email,
+                   String currency_id, String language_id) {
         this.company_uuid = company_uuid;
         this.name = name;
         this.country_id = country_id;
@@ -30,6 +33,8 @@ public class Company {
         this.email_address = email_address;
         this.accounting_email = accounting_email;
         this.technical_email = technical_email;
+        this.language_id = language_id;
+        this.currency_id = currency_id;
     }
 
     public Company() {}
@@ -80,5 +85,9 @@ public class Company {
 
     public String getTechnical_email() {
         return technical_email;
+    }
+
+    public String getLanguage_id() {
+        return language_id;
     }
 }

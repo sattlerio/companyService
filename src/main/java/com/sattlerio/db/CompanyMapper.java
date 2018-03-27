@@ -21,7 +21,8 @@ public class CompanyMapper implements ResultSetMapper<Company>{
                 r.getString("phone_number"),
                 r.getString("email_address"),
                 r.getString("accounting_email"),
-                r.getString("technical_email")
+                r.getString("technical_email"),
+                r.getString("language_id")
         );
     }
 }
