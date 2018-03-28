@@ -13,14 +13,14 @@ public class Company {
     private String email_address;
     private String accounting_email;
     private String technical_email;
-    private String currency_id;
     private String language_id;
+    private String currency_id;
 
     public Company(String company_uuid, String name, String country_id,
                    String address, String zip, String city, String vat,
                    String logo, String phone_number, String email_address,
                    String accounting_email, String technical_email,
-                   String currency_id, String language_id) {
+                   String language_id, String currency_id) {
         this.company_uuid = company_uuid;
         this.name = name;
         this.country_id = country_id;
@@ -89,5 +89,9 @@ public class Company {
 
     public String getLanguage_id() {
         return language_id;
+    }
+
+    public String getCurrency_id() {
+        return currency_id;
     }
 }
