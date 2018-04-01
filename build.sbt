@@ -19,6 +19,9 @@ mainClass in assembly := Some(" com.sattlerio.companyServiceApplication")
 libraryDependencies += "io.dropwizard" % "dropwizard-core" % "1.2.2"
 libraryDependencies += "org.postgresql" % "postgresql" % "9.4.1212.jre7"
 libraryDependencies += "io.dropwizard" % "dropwizard-jdbi" % "1.2.2"
+excludeDependencies += "commons-logging" % "commons-logging"
+libraryDependencies += "com.mashape.unirest" % "unirest-java" % "1.4.9"
+
 
 libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
 libraryDependencies += "io.dropwizard" % "dropwizard-testing" % "1.2.2" % Test

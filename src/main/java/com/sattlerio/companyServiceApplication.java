@@ -1,6 +1,7 @@
 package com.sattlerio;
 
 import com.sattlerio.db.CompanyDAO;
+import com.sattlerio.db.UserDAO;
 import com.sattlerio.resources.CompanyResource;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
@@ -41,8 +42,9 @@ public class companyServiceApplication extends Application<companyServiceConfigu
             final DBIFactory factory = new DBIFactory();
             final DBI jdbi = factory.build(environment, configuration.getSourceFactory(), "postgresql");
             CompanyDAO companyDAO = jdbi.onDemand(CompanyDAO.class);
+            UserDAO userDAO = jdbi.onDemand(UserDAO.class);
 
-            final CompanyResource companyResource = new CompanyResource(companyDAO);
+            final CompanyResource companyResource = new CompanyResource(companyDAO, userDAO);
 
             environment.jersey().register(companyResource);
         } catch (Exception e) {
