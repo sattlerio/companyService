@@ -2,6 +2,7 @@ package com.sattlerio.resources;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import com.sattlerio.api.CompanyContacts;
 import com.sattlerio.api.CompanySettings;
 import com.sattlerio.cli.GeoService;
 import com.sattlerio.db.Company;
@@ -36,16 +37,48 @@ public class CompanyResource {
     @PUT
     @Timed
     @ExceptionMetered
-    @Path("/details/{company_id}")
-    public Response updateCompanyById(@Context HttpHeaders httpHeaders,
-                                      @PathParam("company_id")NonEmptyStringParam company_id,
-                                      @Valid CompanySettings companySettings) {
+    @Path("/contacts/{company_id}")
+    public Response updateCompanyContactsById(@Context HttpHeaders httpHeaders,
+                                              @PathParam("company_id")NonEmptyStringParam company_id,
+                                              @Valid CompanyContacts companyContacts) {
         String requestId = httpHeaders.getHeaderString("x-transactionid");
 
         logInfoWithTransactionId("got new transaction to update company", requestId);
 
         String userId = httpHeaders.getHeaderString("x-user-uuid");
 
+        this.validateParams(userId, company_id, requestId);
+        this.validateCompanyAndUserPermission(company_id, requestId, userId);
+
+
+        logInfoWithTransactionId("all checks were positive going to update company now", requestId);
+
+        try {
+            companyDAO.updateCompanyContacts(companyContacts.getPhone_number(),
+                    companyContacts.getEmail_address(),
+                    companyContacts.getTechnical_email(),
+                    companyContacts.getAccounting_email(),
+                    company_id.get().get());
+
+            JSONObject response = generateBasicJSONResponse("OK", "updated company contacts",
+                    requestId, 200);
+
+            return Response.status(200).entity(response.toString()).build();
+
+        } catch (Exception e) {
+            logInfoWithTransactionId("there was an error while writting into db ", requestId);
+            log.info(e.toString());
+            log.info(e.getMessage());
+
+            JSONObject response = generateBasicJSONResponse("ERROR", "sorry not possible to write into the database",
+                    requestId, 500);
+
+            return Response.status(500).entity(response.toString()).build();
+        }
+
+    }
+
+    private void validateParams(String userId, NonEmptyStringParam company_id, String requestId) {
         if(userId == null) {
             logInfoWithTransactionId("abort transaction because of missing X-User header", requestId);
             throw new WebApplicationException(401);
@@ -55,14 +88,9 @@ public class CompanyResource {
             logInfoWithTransactionId("abort transaction because of missing company id", requestId);
             throw new WebApplicationException(400);
         }
+    }
 
-        Boolean geoDataCeck = validateGeoData(companySettings.getCountry_id(), companySettings.getLanguage_id());
-
-        if(geoDataCeck != true) {
-            logInfoWithTransactionId("abort transaction because country id or company id does not exist", requestId);
-            throw new WebApplicationException(404);
-        }
-
+    private Integer validateCompanyAndUserPermission(NonEmptyStringParam company_id, String requestId, String userId) {
         Integer companyDBId = companyDAO.getCompanyIdFromCompanyUuid(company_id.get().get());
         logInfoWithTransactionId(String.valueOf(companyDBId), requestId);
 
@@ -83,6 +111,35 @@ public class CompanyResource {
             throw new WebApplicationException(401);
         }
 
+        return companyDBId;
+
+
+    }
+
+    @PUT
+    @Timed
+    @ExceptionMetered
+    @Path("/details/{company_id}")
+    public Response updateCompanyById(@Context HttpHeaders httpHeaders,
+                                      @PathParam("company_id")NonEmptyStringParam company_id,
+                                      @Valid CompanySettings companySettings) {
+        String requestId = httpHeaders.getHeaderString("x-transactionid");
+
+        logInfoWithTransactionId("got new transaction to update company", requestId);
+
+        String userId = httpHeaders.getHeaderString("x-user-uuid");
+
+        this.validateParams(userId, company_id, requestId);
+
+        Boolean geoDataCeck = validateGeoData(companySettings.getCountry_id(), companySettings.getLanguage_id());
+
+        if(geoDataCeck != true) {
+            logInfoWithTransactionId("abort transaction because country id or company id does not exist", requestId);
+            throw new WebApplicationException(404);
+        }
+
+        this.validateCompanyAndUserPermission(company_id, requestId, userId);
+
         logInfoWithTransactionId("all checks were positive going to update company now", requestId);
 
         try {
@@ -95,11 +152,7 @@ public class CompanyResource {
                     companySettings.getLanguage_id(),
                     company_id.get().get());
 
-            JSONObject response = new JSONObject();
-            response.put("status", "OK");
-            response.put("message", "updated company");
-            response.put("request_id", requestId);
-            response.put("status_code", 200);
+            JSONObject response = generateBasicJSONResponse("OK", "updated company", requestId, 200);
 
             return Response.status(200).entity(response.toString()).build();
 
@@ -108,11 +161,8 @@ public class CompanyResource {
             log.info(e.toString());
             log.info(e.getMessage());
 
-            JSONObject response = new JSONObject();
-            response.put("status", "ERROR");
-            response.put("message", "sorry not possible to write into the database");
-            response.put("request_id", requestId);
-            response.put("status_code", 500);
+            JSONObject response = generateBasicJSONResponse("ERROR", "sorry not possible to write into the database",
+                    requestId, 500);
 
             return Response.status(500).entity(response.toString()).build();
         }
@@ -128,6 +178,15 @@ public class CompanyResource {
             return true;
         }
         return false;
+    }
+
+    private JSONObject generateBasicJSONResponse(String status, String message, String requestId, Integer statusCode) {
+        JSONObject response = new JSONObject();
+        response.put("status", status);
+        response.put("message", message);
+        response.put("request_id", requestId);
+        response.put("status_code", statusCode);
+        return response;
     }
 
     @GET

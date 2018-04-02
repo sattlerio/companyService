@@ -25,4 +25,11 @@ public interface CompanyDAO {
                                @Bind("company_country_id") String company_country_id,
                                @Bind("company_language_id") String company_language_id,
                                @Bind("company_uuid") String company_uuid);
+
+    @SqlUpdate("UPDATE companies SET phone_number = :phone_number, email_address = :email_address, technical_email = :technical_email, accounting_email = :accounting_email WHERE company_uuid = :company_uuid")
+    void updateCompanyContacts(@Bind("phone_number") String phone_number,
+                               @Bind("email_address") String email_address,
+                               @Bind("technical_email") String technical_email,
+                               @Bind("accounting_email") String accounting_email,
+                               @Bind("company_uuid") String company_uuid);
 }
