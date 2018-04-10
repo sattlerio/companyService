@@ -8,7 +8,7 @@ server:
   adminContextPath: /admin
   connector:
     type: http
-    port: 9000
+    port: 9050
 database:
   driverClass: org.postgresql.Driver
   user: ${COMPANY_SERVICE_POSTGRES_USER}
